@@ -24,7 +24,7 @@ void primorial_handle(int start, int end, mpz_t primorial, int realbase, mpz_t p
     mpz_clear(rebase);
 }
 //#define PRIMECOUNT 3
-#define MAX_CHUNKS 32
+#define MAX_CHUNKS 64
 
 int main(int argc, char* argv[]) {
     int primorial_index = atoi(argv[1]) - 1;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
         mpz_set_ui(mpow,primes[i]);
         int flag = 0;
-        int max_steps = 30;
+        int max_steps = MAX_CHUNKS - 2;
         int current_step = 0;
         for (int j = 0; j <= primorial_index; j++) {
             if (j == 0) {primorial_handle(0,qrtr_steps[0] - 1,primorial,primes[i],prime);}
