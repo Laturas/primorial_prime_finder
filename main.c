@@ -24,6 +24,7 @@ void primorial_handle(int start, int end, mpz_t primorial, int realbase, mpz_t p
     mpz_clear(rebase);
 }
 //#define PRIMECOUNT 3
+#define MAX_CHUNKS 32
 
 int main(int argc, char* argv[]) {
     int primorial_index = atoi(argv[1]) - 1;
@@ -38,9 +39,10 @@ int main(int argc, char* argv[]) {
     
     clock_t powbench = 0.0;
     clock_t divbench = 0.0;
-    const int quarter = primorial_index / 4 + 1;
-    const int half = primorial_index / 2 + 1;
-    const int three_quarters = ((primorial_index * 3) / 4) + 1;
+    int qrtr_steps[MAX_CHUNKS] = {0};
+    for (int i = 0; i < MAX_CHUNKS; i++) {
+        qrtr_steps[i] = ((primorial_index * (i + 1)) / MAX_CHUNKS) + 1;
+    }
 
     NEW(mpow); NEW(non_one); mpz_init(bas); mpz_init(expn);
     for (int i = 3; i < 1799; i++) {
@@ -50,14 +52,22 @@ int main(int argc, char* argv[]) {
 
         mpz_set_ui(mpow,primes[i]);
         int flag = 0;
+        int max_steps = 30;
+        int current_step = 0;
         for (int j = 0; j <= primorial_index; j++) {
-            if (j == 0) {primorial_handle(0,primorial_index / 4,primorial,primes[i],prime);}
-            if (j == quarter) {primorial_handle(quarter,primorial_index / 2,primorial,primes[i],prime);}
-            if (j == half) {primorial_handle(half,((primorial_index * 3) / 4),primorial,primes[i],prime);}
-            if (j == three_quarters) {primorial_handle(three_quarters,primorial_index,primorial,primes[i],prime);}
+            if (j == 0) {primorial_handle(0,qrtr_steps[0] - 1,primorial,primes[i],prime);}
+            if (current_step != max_steps) {
+                if (j == qrtr_steps[current_step]) {primorial_handle(qrtr_steps[current_step],qrtr_steps[current_step + 1] - 1,primorial,primes[i],prime); current_step++;}
+            }
+            else {
+                if (j == qrtr_steps[current_step]) {primorial_handle(qrtr_steps[current_step],primorial_index,primorial,primes[i],prime);}
+            }
+            //if (j == qrtr_steps[0]) {primorial_handle(qrtr_steps[0],qrtr_steps[1] - 1,primorial,primes[i],prime);}
+            //if (j == qrtr_steps[1]) {primorial_handle(qrtr_steps[1],qrtr_steps[2] - 1,primorial,primes[i],prime);}
+            
             mpz_divexact_ui(expn,expn,primes[j]);
             //printf("Removing %d from expn, ",primes[j]);
-            if (j != 0 && j != quarter && j != half && j != three_quarters) {mpz_mul_ui(expn,expn,primes[j-1]); /*printf("adding %d\n",primes[j - 1]);*/}
+            if (j != 0 && j != qrtr_steps[current_step]) {mpz_mul_ui(expn,expn,primes[j-1]); /*printf("adding %d\n",primes[j - 1]);*/}
             //clock_t strt_divbench = clock();
             //mpz_divexact_ui(non_one,primorial,primes[j]);
             //divbench += clock() - strt_divbench;
