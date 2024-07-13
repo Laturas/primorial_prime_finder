@@ -195,6 +195,10 @@ void pocklington_check(const int primorial_index) {
     //mpz_clear(prime);
 }
 
+void chunk_base(int start, int end, mpz_t primorial, int realbase, mpz_t prime) {
+
+}
+
 void ppbls_test(const int primorial_index) {
     clock_t start = clock();
     NEWUI(primorial,2);
@@ -218,9 +222,13 @@ void ppbls_test(const int primorial_index) {
 
     NEW(remexp);
     mpz_divexact(remexp,primorial,F);
+    int steps[MAX_CHUNKS] = {0};
+    for (int i = 0; i < MAX_CHUNKS; i++) {
+        steps[i] = (((primorial_index - bigf_fac_index) * (i + 1)) / MAX_CHUNKS) + 1;
+    }
     
     NEW(res);
-    for (int aui = 2; aui < 10; aui++) {
+    for (int aui = 2; aui < 3; aui++) {
         printf("Testing witness a = %d^(%d#/F)\n",aui,primes[primorial_index]);
         NEWUI(a,aui);
         mpz_powm(a,a,remexp,prime);
@@ -228,15 +236,23 @@ void ppbls_test(const int primorial_index) {
         int a_flag = (mpz_cmp_ui(res,1) == 0);
         //if (flag) {printf("We win! :D\na = %d\n",aui); fflush(stdout); return;}
         if (!a_flag) {printf("failed for g=%d\n",aui); continue;}
-
+        int current_step = 0;
+        int max_steps = MAX_CHUNKS - 2; 
         for (int q = 0; q <= bigf_fac_index; q++) {
             NEW(temppow); NEW(gcd);
             mpz_divexact_ui(temppow,F,primes[primorial_index - q]);
+            if (q == 0); //{primorial_handle(bigf_fac_index,bigf_fac_index + steps[0] - 1,primorial,primes[item],prime);}
+            if (current_step != max_steps) {
+                if (q == steps[current_step]); //{primorial_handle(steps[current_step],steps[current_step + 1] - 1,primorial,primes[item],prime); current_step++;}
+            }
+            else {
+                if (q == steps[current_step]); //{primorial_handle(steps[current_step],primorial_index,primorial,primes[item],prime);}
+            }
             //divbench += clock() - strt_divbench;
 
             //gmp_printf("Testing %Zd ^ %Zd mod %Zd\n", mpow, non_one, prime);
             //clock_t strt_powbench = clock();
-            mpz_powm(res,bas,temppow,prime); // store, base, expn, mod
+            mpz_powm(res,a,temppow,prime); // store, base, expn, mod
             mpz_sub_ui(res,res,1);
             mpz_gcd(gcd,res,prime);
             if ((mpz_cmp_ui(gcd,1) != 0)) {
@@ -260,7 +276,7 @@ void ppbls_test(const int primorial_index) {
         }
         mpz_clear(a);
     }
-    printf("Failed to find a valid a the range :(\n");
+    printf("Probably not prime :(\n");
 
 }
 
