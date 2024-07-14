@@ -195,8 +195,19 @@ void pocklington_check(const int primorial_index) {
     //mpz_clear(prime);
 }
 
-void chunk_base(int start, int end, mpz_t primorial, int realbase, mpz_t prime) {
+mpz_t chunked_base;
+mpz_t chunked_exp;
 
+void chunk_base(int start, int end, mpz_t F, mpz_t realbase, mpz_t prime) {
+    mpz_set_ui(chunked_exp,primes[start]);
+    for (int k = start + 1; k <= end; k++) {
+        mpz_mul_ui(chunked_exp,chunked_exp,primes[k]);
+        //printf("* %d ",primes[k]);
+    }
+    NEW(everything_else);
+    mpz_divexact(everything_else,F,chunked_exp);
+    mpz_powm(chunked_base,realbase,everything_else,prime);
+    mpz_clear(everything_else);
 }
 
 void ppbls_test(const int primorial_index) {
@@ -241,7 +252,7 @@ void ppbls_test(const int primorial_index) {
         for (int q = 0; q <= bigf_fac_index; q++) {
             NEW(temppow); NEW(gcd);
             mpz_divexact_ui(temppow,F,primes[primorial_index - q]);
-            if (q == 0); //{primorial_handle(bigf_fac_index,bigf_fac_index + steps[0] - 1,primorial,primes[item],prime);}
+            if (q == 0); {chunk_base(0,primorial_index,primorial,primes[i],prime);}
             if (current_step != max_steps) {
                 if (q == steps[current_step]); //{primorial_handle(steps[current_step],steps[current_step + 1] - 1,primorial,primes[item],prime); current_step++;}
             }
